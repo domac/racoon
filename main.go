@@ -1,7 +1,10 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"github.com/codegangsta/cli"
+	"github.com/phillihq/racoon/config"
 	"github.com/phillihq/racoon/util"
 	"os"
 	"runtime"
@@ -19,7 +22,11 @@ func appAction(c *cli.Context) error {
 
 	confileFilePath := c.String(configFileFlag.Name)
 
-	println("-------", confileFilePath)
+	//读取配置信息
+	_, err := config.LoadConfigFromFile(confileFilePath)
+	if err != nil {
+		return errors.New(fmt.Sprintf("load config file failed, %v", err))
+	}
 
 	//退出信号处理
 	signalCH := util.InitSignal()
