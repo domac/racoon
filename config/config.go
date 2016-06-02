@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"github.com/codegangsta/inject"
+	"github.com/phillihq/racoon/config/gather"
 	"github.com/phillihq/racoon/util"
 	"io/ioutil"
 	"reflect"
@@ -10,8 +11,8 @@ import (
 
 var bufferChannelSize = 100 //初始化缓冲通道大小
 
-type InputCh chan string
-type OutputCh chan string
+type InputCh chan gather.GatherData
+type OutputCh chan gather.GatherData
 
 //上下文配置接口
 type ContextConfig interface {

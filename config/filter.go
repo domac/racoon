@@ -4,12 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/codegangsta/inject"
+	"github.com/phillihq/racoon/config/gather"
 	"github.com/phillihq/racoon/util"
 )
 
 type FilterContextConfig interface {
 	ContextConfig
-	Process(string) string
+	Process(gather.GatherData) gather.GatherData
 }
 
 //过滤器配置信息
@@ -31,6 +32,21 @@ func (self *Config) RunFilters() (err error) {
 }
 
 func (self *Config) runFilters(inchan InputCh, outchan OutputCh) (err error) {
+	filters, err := self.getFilters()
+	if err != nil {
+		return
+	}
+	go func() {
+		for {
+			select {
+			case data := <-inchan:
+				for _, filter := range filters {
+					data = filter.Process(data)
+				}
+				outchan <- data
+			}
+		}
+	}()
 	return
 }
 
