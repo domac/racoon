@@ -52,7 +52,7 @@ type Config struct {
 }
 
 //只调用,不获取结果
-func (self *Config) Invoke(f interface{}) error {
+func (self *Config) InvokeFunc(f interface{}) error {
 	_, err := util.FuncInvoke(self.Injector, f)
 	return err
 }
@@ -84,6 +84,19 @@ func LoadConfigFromData(data []byte) (config Config, err error) {
 	//注入相关结构到配置上下文
 	config.Map(inputChannel)
 	config.Map(outputChannel)
+
+	return
+}
+
+func ReflectConfig(configItem *ConfigItem, conf interface{}) (err error) {
+	data, err := json.Marshal(configItem)
+	if err != nil {
+		return
+	}
+
+	if err = json.Unmarshal(data, conf); err != nil {
+		return
+	}
 
 	return
 }
