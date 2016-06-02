@@ -3,7 +3,9 @@ package util
 import (
 	"fmt"
 	"github.com/codegangsta/cli"
+	"github.com/codegangsta/inject"
 	"log"
+	"reflect"
 )
 
 var appFlags = map[string]cli.Flag{}
@@ -31,4 +33,22 @@ func ActionWrapper(action func(context *cli.Context) error) func(context *cli.Co
 			log.Println(err.Error())
 		}
 	}
+}
+
+//函数调用
+func FuncInvoke(injector inject.Injector, f interface{}) (results []reflect.Value, err error) {
+	if results, err = injector.Invoke(f); err != nil {
+		return
+	}
+	for _, res := range results {
+		if res.IsValid() {
+			resI := res.Interface()
+			switch resI.(type) {
+			case error:
+				err = resI.(error)
+				break
+			}
+		}
+	}
+	return
 }

@@ -1,0 +1,18 @@
+{
+    "input": [{
+        "type": "exec",
+        "command": "uptime",
+        "args": [],
+        "interval": 3,
+        "message_prefix": "%{@timestamp} "
+    },{
+        "type": "exec",
+        "command": "whoami",
+        "args": [],
+        "interval": 4,
+        "message_prefix": "%{@timestamp} "
+    }],
+    "output": [{
+        "type": "stdout"
+    }]
+}

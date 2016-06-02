@@ -52,8 +52,8 @@ type Config struct {
 }
 
 //只调用,不获取结果
-func (self *Config) Invoke(injector inject.Injector, f interface{}) error {
-	_, err := util.FuncInvoke(injector, f)
+func (self *Config) Invoke(f interface{}) error {
+	_, err := util.FuncInvoke(self.Injector, f)
 	return err
 }
 
