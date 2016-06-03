@@ -1,8 +1,14 @@
 package exec
 
 import (
+	"bytes"
+	"errors"
 	"github.com/phillihq/racoon/config"
+	"github.com/phillihq/racoon/config/gather"
 	"os"
+	osexec "os/exec"
+	"strings"
+	"time"
 )
 
 const ModuleName = "exec"
@@ -44,5 +50,67 @@ func InitHandler(configitem *config.ConfigItem) (contextConfig config.InputConte
 }
 
 func (self *InputConfig) Start() {
-	println("============= exec start =============")
+	startChan := make(chan bool)
+	ticker := time.NewTicker(time.Duration(self.Interval) * time.Second)
+
+	go func() {
+		startChan <- true
+	}()
+
+	for {
+		select {
+		case <-startChan:
+			self.InvokeGet(self.Exec)
+		case <-ticker.C:
+			self.InvokeGet(self.Exec)
+		}
+	}
+}
+
+func (self *InputConfig) Exec(inchan config.InputCh) {
+	errs := []error{}
+
+	message, err := self.doExec()
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	extra := map[string]interface{}{
+		"host": self.hostname,
+	}
+
+	gData := gather.GatherData{
+		Message:   message,
+		Timestamp: time.Now(),
+		Extra:     extra,
+	}
+
+	if len(errs) > 0 {
+		gData.AddTag("inputexec_failed")
+	}
+	inchan <- gData
+	return
+}
+
+//命令执行
+func (self *InputConfig) doExec() (data string, err error) {
+	var (
+		buffer bytes.Buffer
+		raw    []byte
+		cmd    *osexec.Cmd
+	)
+
+	cmd = osexec.Command(self.Command, self.Args...)
+	cmd.Stderr = &buffer
+	if raw, err = cmd.Output(); err != nil {
+		return
+	}
+	data = string(raw)
+
+	data = strings.Trim(data, self.MsgTrim)
+
+	if buffer.Len() > 0 {
+		err = errors.New(buffer.String())
+	}
+	return
 }
