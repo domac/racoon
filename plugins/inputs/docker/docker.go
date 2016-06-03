@@ -71,8 +71,6 @@ func (self *DockerStatsInputConfig) Start() {
 
 func (self *DockerStatsInputConfig) doStart(inchan config.InputCh) (err error) {
 
-	println("--- start docker input")
-
 	defer func() {
 		if err != nil {
 			fmt.Errorf(err.Error())
@@ -80,7 +78,9 @@ func (self *DockerStatsInputConfig) doStart(inchan config.InputCh) (err error) {
 	}()
 
 	containers, err := self.client.ListContainers(docker.ListContainersOptions{})
+
 	if err != nil {
+		println(err.Error())
 		return
 	}
 	//采集容器信息
@@ -104,12 +104,10 @@ func (self *DockerStatsInputConfig) doStart(inchan config.InputCh) (err error) {
 		select {
 		case dockerEvent := <-dockerEventChan:
 			if dockerEvent.Status == "start" { //docker启动
-				fmt.Println("----> container start [id]:", dockerEvent.ID)
 				container, err := self.client.InspectContainer(dockerEvent.ID)
 				if err != nil {
 					return err
 				}
-				fmt.Println("----> container start [name]:", container.Name)
 				since, ok := self.sincemap[container.ID]
 				if !ok || since == nil {
 					since = &time.Time{}
@@ -124,8 +122,6 @@ func (self *DockerStatsInputConfig) doStart(inchan config.InputCh) (err error) {
 
 //监听容器的状态信息
 func (self *DockerStatsInputConfig) listenToContainerStats(container interface{}, since *time.Time, inchan config.InputCh) (err error) {
-
-	println("--- listen docker container")
 
 	defer func() {
 		if err != nil {
