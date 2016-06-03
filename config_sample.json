@@ -6,12 +6,10 @@
         "interval": 3,
         "message_prefix": "%{@timestamp} "
     },{
-        "type": "exec",
-        "command": "whoami",
-        "args": [],
-        "interval": 4,
-        "message_prefix": "%{@timestamp} "
-    }],
+		"type": "dockerstats",
+		"host": "unix:///var/run/docker.sock",
+		"stat_interval": 3
+	}],
     "output": [{
         "type": "stdout"
     }]

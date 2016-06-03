@@ -1,3 +1,3 @@
 # racoon
-message collector ... 
+docker stats and log collection tool.
 
