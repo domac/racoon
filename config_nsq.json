@@ -1,0 +1,14 @@
+{
+    "input": [{
+        "type": "exec",
+        "command": "uptime",
+        "args": [],
+        "interval": 3,
+        "message_prefix": "%{@timestamp} "
+    }],
+    "output": [{
+        "type": "nsq",
+        "nsqd": "192.168.139.134:4150",
+        "topic": "test"
+    }]
+}
